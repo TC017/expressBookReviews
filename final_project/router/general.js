@@ -4,10 +4,8 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
-public_users.post("/register", (req, res) => {
-  //Write your code here
-  return res.status(300).json({ message: "Yet to be implemented" });
-});
+// Import the axios library
+const axios = require("axios");
 
 // Get the book list available in the shop
 public_users.get("/", function (req, res) {
@@ -15,9 +13,42 @@ public_users.get("/", function (req, res) {
   res.send(JSON.stringify(books, null, 4));
 });
 
+// Get the book list available in the shop using axios and async
+// Asynchronous function to get book list
+const fetchBooks = async (req, res, next) => {
+  try {
+    const response = await axios.get("https://g37484-5000.csb.app/");
+    req.books = response.data;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+public_users.get("/axios", fetchBooks, (req, res) => {
+  res.send(req.books);
+});
+
 // Get book details based on ISBN
 public_users.get("/isbn/:isbn", function (req, res) {
   res.send(JSON.stringify(books[req.params.isbn], null, 4));
+});
+
+// Asynchronous function to get book list based on ISBN
+const fetchISBN = async (req, res, next) => {
+  try {
+    const response = await axios.get(
+      `https://g37484-5000.csb.app/isbn/${req.params.isbn}`
+    );
+    req.books = response.data;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+public_users.get("/axios/isbn/:isbn", fetchISBN, (req, res) => {
+  res.send(req.books);
 });
 
 // Get book details based on author
@@ -33,6 +64,23 @@ public_users.get("/author/:author", function (req, res) {
   res.send(JSON.stringify(filteredBooks, null, 4));
 });
 
+// Asynchronous function to get book list based on Author
+const fetchAuthor = async (req, res, next) => {
+  try {
+    const response = await axios.get(
+      `https://g37484-5000.csb.app/author/${req.params.author}`
+    );
+    req.books = response.data;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+public_users.get("/axios/author/:author", fetchAuthor, (req, res) => {
+  res.send(req.books);
+});
+
 // Get all books based on title
 public_users.get("/title/:title", function (req, res) {
   const title = req.params.title;
@@ -44,6 +92,23 @@ public_users.get("/title/:title", function (req, res) {
   }, {});
   res.set("Content-Type", "application/json");
   res.send(JSON.stringify(filteredBooks, null, 4));
+});
+
+// Asynchronous function to get book list based on Title
+const fetchtitle = async (req, res, next) => {
+  try {
+    const response = await axios.get(
+      `https://g37484-5000.csb.app/title/${req.params.title}`
+    );
+    req.books = response.data;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+public_users.get("/axios/title/:title", fetchtitle, (req, res) => {
+  res.send(req.books);
 });
 
 //  Get book review
